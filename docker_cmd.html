@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker 및 GitLab 설치 가이드</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        h2 {
+            color: #34495e;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #2980b9;
+            margin-top: 25px;
+        }
+        .step {
+            background: #ecf0f1;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .software-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .software-item {
+            margin: 15px 0;
+            padding: 10px;
+            border-left: 3px solid #28a745;
+            background: white;
+        }
+        .nav-tabs {
+            display: flex;
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+        .nav-tab {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .nav-tab.active {
+            background: white;
+            border-bottom: 2px solid white;
+            margin-bottom: -2px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin: 5px 0;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐳 Docker 및 GitLab 설치 가이드</h1>
+        
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="showTab('online')">온라인 설치</div>
+            <div class="nav-tab" onclick="showTab('offline')">오프라인 설치</div>
+            <div class="nav-tab" onclick="showTab('software')">소프트웨어 목록</div>
+        </div>
+
+        <!-- 온라인 설치 탭 -->
+        <div id="online" class="tab-content active">
+            <h2>📡 온라인 설치 가이드</h2>
+            
+            <div class="step">
+                <h3>사전 준비: 시스템 업데이트 및 기본 유틸리티 설치</h3>
+                <p>가장 먼저 시스템을 최신 상태로 업데이트하고, 저장소 추가 등에 필요한 dnf-utils와 curl을 설치합니다.</p>
+                <div class="code-block">
+sudo dnf update -y
+sudo dnf install -y dnf-utils curl
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>1단계: Git 설치</h3>
+                <p>GitLab을 설치하기 전에 버전 관리 시스템인 Git을 먼저 설치합니다.</p>
+                <div class="code-block">
+sudo dnf install -y git
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>2단계: Docker 설치 및 서비스 활성화</h3>
+                <p>Docker 공식 저장소를 추가하고 Docker 관련 패키지들을 설치합니다.</p>
+                <div class="code-block">
+# Docker 공식 저장소 추가
+sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+# Docker 및 containerd 설치
+sudo dnf install -y docker-ce docker-ce-cli containerd.io
+
+# Docker 서비스 시작 및 부팅 시 자동 실행 설정
+sudo systemctl enable --now docker
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>3단계: GitLab CE (Community Edition) 설치 및 설정</h3>
+                <p>GitLab은 리소스 사용량이 많으므로, 시스템 사양(최소 4 CPU core, 4GB RAM)을 확인하는 것이 좋습니다.</p>
+                <div class="code-block">
+# GitLab 저장소 설정 스크립트 실행
+curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash
+
+# GitLab 설치 (EXTERNAL_URL은 실제 사용할 도메인이나 IP로 변경)
+sudo EXTERNAL_URL="http://gitlab.example.com" dnf install -y gitlab-ce
+
+# GitLab 초기 설정 및 실행 (시간이 다소 걸릴 수 있습니다)
+sudo gitlab-ctl reconfigure
+                </div>
+                <div class="warning">
+                    <strong>⚠️ 중요:</strong> http://gitlab.example.com 부분은 실제 사용할 서버의 도메인 이름이나 IP 주소로 반드시 변경해야 합니다.
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>4단계: GitLab Runner 설치</h3>
+                <p>GitLab CI/CD를 사용하려면 Runner를 설치해야 합니다.</p>
+                <div class="code-block">
+# GitLab Runner 저장소 설정 스크립트 실행
+curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | sudo bash
+
+# GitLab Runner 설치
+sudo dnf install -y gitlab-runner
+
+# GitLab Runner 서비스 시작 및 부팅 시 자동 실행 설정
+sudo systemctl enable --now gitlab-runner
+                </div>
+                <div class="info">
+                    <strong>💡 참고:</strong> 설치 후, GitLab Runner를 웹 인터페이스에서 얻은 토큰을 사용하여 GitLab 인스턴스에 등록(register)해야 합니다.<br>
+                    (예: sudo gitlab-runner register)
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>5단계 (선택): Samba 및 NVIDIA Container Toolkit 설치</h3>
+                <p>필요한 경우에만 설치합니다.</p>
+                
+                <h4>Samba (파일 공유)</h4>
+                <div class="code-block">
+sudo dnf install -y samba
+# Samba 서비스 활성화
+sudo systemctl enable --now smb nmb
+                </div>
+
+                <h4>NVIDIA Container Toolkit (Docker에서 GPU 사용 시)</h4>
+                <div class="code-block">
+# NVIDIA 저장소 설정
+curl -s -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo | sudo tee /etc/yum.repos.d/nvidia-container-toolkit.repo
+
+# NVIDIA Container Toolkit 설치
+sudo dnf install -y nvidia-container-toolkit
+
+# Docker가 NVIDIA 런타임을 사용하도록 재시작
+sudo systemctl restart docker
+                </div>
+            </div>
+        </div>
+
+        <!-- 오프라인 설치 탭 -->
+        <div id="offline" class="tab-content">
+            <h2>💾 오프라인 설치 가이드</h2>
+            
+            <div class="step">
+                <h3>Part 1: 인터넷이 연결된 PC에서 준비 작업</h3>
+                <p>먼저 인터넷이 연결된, 폐쇄망에 설치할 Rocky Linux와 동일한 버전/아키텍처의 PC에서 모든 파일을 다운로드해야 합니다.</p>
+                
+                <h4>1. RPM 파일들을 저장할 디렉토리 생성</h4>
+                <div class="code-block">
+mkdir ~/offline-rpms
+cd ~/offline-rpms
+                </div>
+
+                <h4>2. 필요한 외부 저장소(Repository) 추가</h4>
+                <p>Docker와 GitLab은 기본 저장소에 없으므로, 해당 저장소 정보를 추가해야 dnf가 패키지를 찾을 수 있습니다.</p>
+                <div class="code-block">
+# Docker 저장소 추가
+sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+# GitLab CE 저장소 추가
+curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash
+
+# GitLab Runner 저장소 추가
+curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | sudo bash
+                </div>
+
+                <h4>3. 모든 필요 패키지 및 의존성 파일 다운로드</h4>
+                <p>dnf download --resolve 명령어는 지정된 패키지뿐만 아니라, 설치에 필요한 모든 의존성 패키지까지 현재 디렉토리(~/offline-rpms)에 다운로드해 줍니다.</p>
+                <div class="code-block">
+sudo dnf download --resolve \
+  git \
+  docker-ce \
+  docker-ce-cli \
+  containerd.io \
+  gitlab-ce \
+  gitlab-runner \
+  samba \
+  nvidia-container-toolkit
+                </div>
+                <div class="warning">
+                    <strong>⚠️ 주의:</strong> 이 과정은 수백 개의 파일을 다운로드할 수 있으며 시간이 걸립니다.
+                </div>
+
+                <h4>4. USB로 파일 복사</h4>
+                <p>다운로드가 완료되면 ~/offline-rpms 디렉토리 전체를 USB 저장소로 복사합니다.</p>
+                <div class="code-block">
+# 예: /run/media/user/MyUSB 가 USB 마운트 경로일 경우
+cp -r ~/offline-rpms /run/media/user/MyUSB/
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>Part 2: 폐쇄망 PC에서 설치 작업</h3>
+                <p>이제 USB를 폐쇄망 PC에 연결하고 설치를 진행합니다.</p>
+                
+                <h4>1. USB에서 PC로 RPM 파일 복사</h4>
+                <p>USB에 있는 offline-rpms 디렉토리를 폐쇄망 PC의 홈 디렉토리 등으로 복사합니다.</p>
+                <div class="code-block">
+# 예: USB가 /dev/sdb1 이고 /mnt/usb에 마운트한 경우
+mkdir ~/offline-rpms
+cp -r /mnt/usb/offline-rpms/* ~/offline-rpms/
+cd ~/offline-rpms
+                </div>
+
+                <h4>2. 로컬 RPM 파일들로 설치 진행</h4>
+                <p>dnf는 디렉토리 내의 모든 .rpm 파일을 대상으로 의존성을 분석하여 한 번에 설치할 수 있습니다.</p>
+                <div class="code-block">
+# 현재 디렉토리의 모든 rpm 파일 설치
+sudo dnf install ./*.rpm
+                </div>
+                <p>이 명령을 실행하면 dnf가 offline-rpms 폴더 내의 파일들을 보고 필요한 순서대로 설치를 진행합니다.</p>
+
+                <h4>3. 설치 후 설정 작업</h4>
+                <p>온라인 설치와 마찬가지로, 설치가 완료된 후에는 각 서비스의 설정 및 활성화 작업이 필요합니다.</p>
+                <div class="code-block">
+# Docker 서비스 활성화
+sudo systemctl enable --now docker
+
+# GitLab 초기 설정 (시간이 오래 걸림)
+# http://gitlab.example.com 부분은 폐쇄망에서 사용할 IP나 호스트명으로 변경
+sudo EXTERNAL_URL="http://your.closed.network.ip" gitlab-ctl reconfigure
+
+# GitLab Runner 서비스 활성화
+sudo systemctl enable --now gitlab-runner
+
+# Samba 서비스 활성화 (필요 시)
+sudo systemctl enable --now smb nmb
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>폐쇄망 PC 오프라인 설치 전체 가이드</h3>
+                
+                <div class="info">
+                    <strong>💡 사전 확인:</strong> dnf 명령어에 대하여<br>
+                    먼저, 가장 중요한 점입니다. Rocky Linux를 정상적으로 설치했다면 패키지 관리자인 dnf는 기본적으로 설치되어 있습니다. 따라서 dnf 명령어를 사용할 수 없는 걱정은 하지 않으셔도 됩니다. 이 가이드는 dnf를 사용하여 로컬 파일을 설치하는 방식입니다.
+                </div>
+
+                <h4>1단계: USB 장치 확인 및 마운트</h4>
+                <p>PC에 USB를 꽂으면, 시스템이 USB를 인식하지만 바로 사용할 수는 없습니다. '마운트'라는 과정을 통해 시스템이 USB의 파일에 접근할 수 있도록 연결해 주어야 합니다.</p>
+                
+                <p><strong>1. USB 장치 이름 확인</strong></p>
+                <p>USB를 꽂은 후, 아래 명령어를 실행하여 시스템에 연결된 디스크 목록을 확인합니다. sdb, sdc 등으로 표시되는 것이 USB일 확률이 높으며, 파티션 이름인 sdb1 또는 sdc1 등을 확인해야 합니다. (사이즈를 보고 판단하면 쉽습니다.)</p>
+                <div class="code-block">
+lsblk
+                </div>
+                <p>(예시 출력에서 `sdb1`이 USB인 것을 확인했다고 가정하겠습니다.)</p>
+
+                <p><strong>2. 마운트 포인트 생성</strong></p>
+                <p>USB를 연결할 비어있는 폴더를 하나 만듭니다.</p>
+                <div class="code-block">
+sudo mkdir /mnt/usb
+                </div>
+
+                <p><strong>3. USB 마운트</strong></p>
+                <p>확인한 장치 이름(sdb1)을 마운트 포인트(/mnt/usb)에 연결합니다.</p>
+                <div class="code-block">
+# 아래 명령어에서 /dev/sdb1 부분은 1번 단계에서 확인한 실제 장치 이름으로 변경해야 합니다.
+sudo mount /dev/sdb1 /mnt/usb
+                </div>
+
+                <h4>2단계: 로컬 디스크로 파일 복사</h4>
+                <p>USB에서 직접 설치하는 것보다, PC의 하드디스크로 파일을 모두 복사한 후 설치하는 것이 더 안정적입니다.</p>
+                
+                <p><strong>1. 홈 디렉토리로 파일 전체 복사</strong></p>
+                <p>USB에 있는 offline-rpms 폴더를 현재 사용자의 홈 디렉토리(~/)로 복사합니다.</p>
+                <div class="code-block">
+cp -r /mnt/usb/offline-rpms ~/
+                </div>
+
+                <h4>3단계: 프로그램 일괄 설치</h4>
+                <p>이제 로컬에 복사된 RPM 파일들을 dnf를 사용하여 한 번에 설치합니다. dnf가 폴더 내의 모든 패키지를 분석하여 의존성 순서에 맞게 자동으로 설치해 줍니다.</p>
+                
+                <p><strong>1. RPM 파일이 있는 폴더로 이동</strong></p>
+                <div class="code-block">
+cd ~/offline-rpms
+                </div>
+
+                <p><strong>2. 전체 패키지 설치</strong></p>
+                <p>현재 폴더에 있는 모든 .rpm 파일을 설치하라는 의미의 명령어입니다.</p>
+                <div class="code-block">
+sudo dnf install ./*.rpm
+                </div>
+                <p>(설치 과정에서 정말 설치할 것인지 묻는 `Is this ok [y/N]:` 질문이 나오면 `y`를 입력하고 Enter를 누르십시오.)</p>
+
+                <h4>4단계: 설치 후 서비스 설정 및 활성화</h4>
+                <p>소프트웨어 설치가 완료되었으니, 각 서비스를 시스템에 등록하고 실행하는 단계입니다.</p>
+                
+                <p><strong>1. Docker 서비스 시작 및 자동 실행 설정</strong></p>
+                <div class="code-block">
+sudo systemctl enable --now docker
+                </div>
+
+                <p><strong>2. GitLab 초기 설정</strong></p>
+                <p>가장 중요한 단계입니다. EXTERNAL_URL에 폐쇄망에서 사용할 GitLab의 IP 주소나 호스트 이름을 정확하게 입력해야 합니다. 이 설정은 시간이 몇 분 이상 소요될 수 있습니다.</p>
+                <div class="code-block">
+# http://192.168.1.100 부분을 실제 폐쇄망 PC의 IP 주소로 변경하세요.
+sudo EXTERNAL_URL="http://192.168.1.100" gitlab-ctl reconfigure
+                </div>
+
+                <p><strong>3. GitLab Runner 서비스 시작 및 자동 실행 설정</strong></p>
+                <div class="code-block">
+sudo systemctl enable --now gitlab-runner
+                </div>
+                <p>(참고: GitLab Runner는 이 단계에서 서비스만 시작되며, GitLab에 연동(register)하는 작업은 GitLab UI에 접속하여 별도로 진행해야 합니다.)</p>
+
+                <h4>5단계: USB 연결 해제 (마무리)</h4>
+                <p>모든 작업이 끝났으면 USB를 안전하게 제거합니다.</p>
+                <div class="code-block">
+sudo umount /mnt/usb
+                </div>
+                                 <p>이제 USB를 물리적으로 뽑으시면 됩니다. 이 가이드의 4단계까지 완료되었다면, 지정한 IP 주소(예: http://192.168.1.100)로 웹 브라우저에서 접속하여 GitLab 초기 화면을 확인할 수 있습니다.</p>
+             </div>
+
+             <div class="step">
+                 <h3>외장 SSD를 사용한 설치 방법</h3>
+                 <div class="info">
+                     <strong>💡 시작 전:</strong> 모든 설치 파일이 들어있는 2TB 외장 SSD를 폐쇄망 PC에 연결합니다.
+                 </div>
+
+                 <h4>1단계: 외장 SSD 연결(마운트)</h4>
+                 
+                 <p><strong>1. SSD 장치 이름 확인</strong></p>
+                 <p>아래 명령어로 디스크 목록을 확인하여 SSD의 장치 이름을 찾습니다. (예: /dev/sda1)</p>
+                 <div class="code-block">
+lsblk
+                 </div>
+
+                 <p><strong>2. 마운트 폴더 생성</strong></p>
+                 <p>SSD를 연결할 비어있는 폴더를 만듭니다.</p>
+                 <div class="code-block">
+sudo mkdir -p /mnt/ssd
+                 </div>
+
+                 <p><strong>3. SSD 마운트</strong></p>
+                 <p>위에서 확인한 장치 이름을 /mnt/ssd에 연결합니다.</p>
+                 <div class="code-block">
+# /dev/sda1 부분은 실제 확인한 장치 이름으로 변경하세요.
+sudo mount /dev/sda1 /mnt/ssd
+                 </div>
+
+                 <h4>2단계: 설치 파일들을 PC로 복사</h4>
+                 <p>PC의 홈 디렉토리로 offline-rpms 폴더를 전부 복사합니다.</p>
+                 <div class="code-block">
+cp -r /mnt/ssd/offline-rpms ~/
+                 </div>
+
+                 <h4>3단계: 모든 프로그램 일괄 설치</h4>
+                 <p>가장 중요한 단계입니다. 아래 명령어가 폴더 안의 모든 파일을 의존성에 맞게 자동으로 설치합니다.</p>
+                 
+                 <p><strong>1. 설치 폴더로 이동</strong></p>
+                 <div class="code-block">
+cd ~/offline-rpms
+                 </div>
+
+                 <p><strong>2. 전체 패키지 설치</strong></p>
+                 <p>이 폴더에는 GitLab, Docker 뿐만 아니라, 이 PC가 exfat SSD를 읽는 데 필요한 exfatprogs와 fuse-exfat 드라이버도 함께 들어있습니다. dnf가 모든 것을 한 번에 설치해 줄 것입니다.</p>
+                 <div class="code-block">
+sudo dnf install ./*.rpm
+                 </div>
+                 <p>설치 중 `Is this ok [y/N]:` 질문이 나오면 `y`를 입력하고 Enter를 누르세요.</p>
+
+                 <h4>4단계: 설치 후 서비스 설정</h4>
+                 
+                 <p><strong>1. Docker 서비스 활성화</strong></p>
+                 <div class="code-block">
+sudo systemctl enable --now docker
+                 </div>
+
+                 <p><strong>2. GitLab 초기 설정</strong></p>
+                 <p>EXTERNAL_URL에 폐쇄망에서 사용할 GitLab 접속 IP 주소를 입력합니다. 이 설정은 시간이 몇 분 이상 소요될 수 있습니다.</p>
+                 <div class="code-block">
+# http://your.closed.network.ip 부분을 실제 PC의 IP 주소로 변경하세요.
+sudo EXTERNAL_URL="http://your.closed.network.ip" gitlab-ctl reconfigure
+                 </div>
+
+                 <p><strong>3. GitLab Runner 서비스 활성화</strong></p>
+                 <div class="code-block">
+sudo systemctl enable --now gitlab-runner
+                 </div>
+
+                 <h4>5단계: 마무리</h4>
+                 <p>모든 설치와 설정이 끝났습니다. SSD 연결을 해제합니다.</p>
+                 <div class="code-block">
+sudo umount /mnt/ssd
+                 </div>
+                 <p>이제 웹 브라우저에서 설정한 IP 주소(예: http://your.closed.network.ip)로 접속하면 GitLab을 사용할 수 있습니다.</p>
+             </div>
+         </div>
+
+        <!-- 소프트웨어 목록 탭 -->
+        <div id="software" class="tab-content">
+            <h2>📦 설치 소프트웨어 목록</h2>
+            <p>아래 목록은 폐쇄망 환경에 설치할 소프트웨어와 해당 소프트웨어를 다운로드하는 공식 출처를 명시한 것입니다. 모든 소프트웨어는 Rocky Linux의 공식 저장소 또는 각 개발사의 공식 패키지 저장소에서 제공됩니다.</p>
+            
+            <div class="software-list">
+                <div class="software-item">
+                    <h3>1. Git (버전 관리 시스템)</h3>
+                    <ul>
+                        <li><strong>프로그램명:</strong> Git</li>
+                        <li><strong>주요 패키지:</strong> git</li>
+                        <li><strong>제공처:</strong> The Git Project</li>
+                        <li><strong>출처 (저장소):</strong> Rocky Linux 공식 베이스 저장소 (AppStream)</li>
+                        <li><strong>설명:</strong> 소스 코드 버전 관리를 위한 필수 프로그램이며, GitLab 운영의 기본 요소입니다.</li>
+                    </ul>
+                </div>
+
+                <div class="software-item">
+                    <h3>2. Docker (컨테이너 플랫폼)</h3>
+                    <ul>
+                        <li><strong>프로그램명:</strong> Docker Community Edition (CE)</li>
+                        <li><strong>주요 패키지:</strong> docker-ce, docker-ce-cli, containerd.io</li>
+                        <li><strong>제공처:</strong> Docker, Inc.</li>
+                        <li><strong>출처 (저장소):</strong> Docker 공식 저장소</li>
+                        <li><strong>저장소 주소:</strong> https://download.docker.com/linux/centos/docker-ce.repo</li>
+                        <li><strong>설명:</strong> 애플리케이션을 컨테이너 환경에서 실행하기 위한 플랫폼입니다. GitLab Runner가 CI/CD 작업을 컨테이너 내에서 수행할 때 사용됩니다.</li>
+                    </ul>
+                </div>
+
+                <div class="software-item">
+                    <h3>3. GitLab (데브옵스 플랫폼)</h3>
+                    <ul>
+                        <li><strong>프로그램명:</strong> GitLab Community Edition (CE)</li>
+                        <li><strong>주요 패키지:</strong> gitlab-ce</li>
+                        <li><strong>제공처:</strong> GitLab, Inc.</li>
+                        <li><strong>출처 (저장소):</strong> GitLab 공식 저장소</li>
+                        <li><strong>저장소 주소:</strong> https://packages.gitlab.com/gitlab/gitlab-ce</li>
+                        <li><strong>설명:</strong> 소스 코드 저장, CI/CD, 이슈 트래킹 등을 제공하는 올인원 데브옵스 플랫폼입니다.</li>
+                    </ul>
+                </div>
+
+                <div class="software-item">
+                    <h3>4. GitLab Runner (CI/CD 실행기)</h3>
+                    <ul>
+                        <li><strong>프로그램명:</strong> GitLab Runner</li>
+                        <li><strong>주요 패키지:</strong> gitlab-runner</li>
+                        <li><strong>제공처:</strong> GitLab, Inc.</li>
+                        <li><strong>출처 (저장소):</strong> GitLab Runner 공식 저장소</li>
+                        <li><strong>저장소 주소:</strong> https://packages.gitlab.com/runner/gitlab-runner</li>
+                        <li><strong>설명:</strong> GitLab CI/CD 파이프라인의 작업을 실제로 수행하는 에이전트입니다.</li>
+                    </ul>
+                </div>
+
+                <div class="software-item">
+                    <h3>5. Samba (파일 공유 서비스) - 선택 사항</h3>
+                    <ul>
+                        <li><strong>프로그램명:</strong> Samba</li>
+                        <li><strong>주요 패키지:</strong> samba</li>
+                        <li><strong>제공처:</strong> The Samba Team</li>
+                        <li><strong>출처 (저장소):</strong> Rocky Linux 공식 베이스 저장소 (AppStream)</li>
+                        <li><strong>설명:</strong> Linux와 Windows 시스템 간 파일 및 프린터 공유를 위한 서비스입니다. (필요 시 설치)</li>
+                    </ul>
+                </div>
+
+                <div class="software-item">
+                    <h3>6. NVIDIA Container Toolkit - 선택 사항</h3>
+                    <ul>
+                        <li><strong>프로그램명:</strong> NVIDIA Container Toolkit</li>
+                        <li><strong>주요 패키지:</strong> nvidia-container-toolkit</li>
+                        <li><strong>제공처:</strong> NVIDIA Corporation</li>
+                        <li><strong>출처 (저장소):</strong> NVIDIA 공식 저장소</li>
+                        <li><strong>저장소 주소:</strong> https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo</li>
+                        <li><strong>설명:</strong> Docker 컨테이너가 NVIDIA GPU 리소스를 사용할 수 있도록 지원하는 툴킷입니다. (GPU 활용 CI/CD 작업 시 필요)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // 모든 탭 내용 숨기기
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 모든 탭 버튼 비활성화
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 선택된 탭 내용 보이기
+            document.getElementById(tabName).classList.add('active');
+            
+            // 선택된 탭 버튼 활성화
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
